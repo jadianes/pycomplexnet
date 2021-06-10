@@ -4,8 +4,10 @@
 
 ```python
 from pycomplexnet import generators
-net = generators.random_network((1000,1000), .001)
+net = generators.random_network(1000,0.1)
 ```
+
+Check also the [notebooks](notebooks) folder for examples.
 
 ## Testing
 
