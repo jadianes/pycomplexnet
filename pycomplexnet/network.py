@@ -54,3 +54,14 @@ class Network:
                 ))
             )
         )
+
+    def get_distance(self, node_i, node_j):
+        steps = 1
+        a = b = self.adjacency_matrix.toarray()
+        while steps<a.shape[0]:
+            if b[node_j,node_i] > 0:
+                return steps
+            b = np.matmul(b,a)
+            steps+=1
+
+        return np.Inf
