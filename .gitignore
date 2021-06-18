@@ -11,5 +11,7 @@
 # OS related files
 .DS_Store
 
-# virtual environment files
+# other
 /venv
+**/.ipynb_checkpoints/
+.vscode/
