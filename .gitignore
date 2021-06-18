@@ -10,3 +10,6 @@
 
 # OS related files
 .DS_Store
+
+# virtual environment files
+/venv

@@ -11,6 +11,8 @@ Check also the [notebooks](notebooks) folder for examples.
 
 ## Testing
 
+Using **Python 3**.
+
 ```bash
 python setup.py test
 ```

@@ -16,6 +16,7 @@ setup(name='pyComplexNet',
     packages=['pycomplexnet'],
     install_requires=[
         'numpy',
+        'pandas',
         'scipy'
     ],
     include_package_data=True,

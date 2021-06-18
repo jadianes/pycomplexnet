@@ -1,15 +1,50 @@
 
 import numpy as np
+from scipy.sparse import coo_matrix
 
 class Network:
     """A directed graph representation of a Network"""
  
-    def __init__(self, adjacency_matrix):
+    def __init__(self, adjacency_matrix, node_labels=None):
         self.adjacency_matrix = adjacency_matrix
+        if node_labels is not None:
+            self.node_labels = node_labels
+
+    def from_pandas(links, from_column='from', to_column='to'):
+        from_nodes = links[from_column]
+        to_nodes = links[to_column]
+        # get number of unique nodes and labels
+        n_nodes = len(list(set(np.concatenate([from_nodes.values, to_nodes.values]))))
+        all_nodes = []
+        node_labels_t = {}
+        node_i = 0
+        # create adjacency matrix
+        a = np.zeros((n_nodes,n_nodes))
+        for from_node, to_node in zip(from_nodes, to_nodes):
+            # this way of collecting unique nodes is a way to enforce 
+            # the order given in the data frame, versus using list(set())
+            # which doesn't guarantee the order
+            if from_node not in all_nodes:
+                all_nodes.append(from_node)
+                node_labels_t[from_node] = node_i
+                node_i += 1
+            if to_node not in all_nodes:
+                all_nodes.append(to_node)
+                node_labels_t[to_node] = node_i
+                node_i += 1
+            # add link to adjacency matrix
+            a[node_labels_t[from_node], node_labels_t[to_node]] = 1.0
+            
+        # create network
+        return Network(
+            coo_matrix(a), 
+            {
+                index:node for node, index in zip(all_nodes, range(0,n_nodes))
+            })
 
     def toarray(self):
         return self.adjacency_matrix.toarray()
-
+        
     def get_in_degree(self, node_i):
         return self.adjacency_matrix.getcol(node_i).sum()
 

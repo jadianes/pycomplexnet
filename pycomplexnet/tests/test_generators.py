@@ -1,5 +1,4 @@
 from unittest import TestCase
-
 from pycomplexnet import generators
 
 class TestGenerator(TestCase):
