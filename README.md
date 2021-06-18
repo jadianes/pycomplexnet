@@ -1,6 +1,6 @@
-# Complex Networks in Python
-
 ![Package build](https://github.com/jadianes/pycomplexnet/actions/workflows/python-package.yml/badge.svg)
+
+# Complex Networks in Python
 
 ## Quickstart
 
