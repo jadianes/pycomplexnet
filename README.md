@@ -1,6 +1,6 @@
 # Complex Networks in Python
 
-![python-package](https://github.com/jadianes/pyComplexNet/actions/python-package/badge.svg)
+![python-package](https://github.com/jadianes/pyComplexNet/actions/python-package.yml/badge.svg)
 
 ## Quickstart
 
