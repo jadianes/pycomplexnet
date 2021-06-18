@@ -11,12 +11,3 @@ class TestConstructors(TestCase):
             })
         )
         self.assertEqual(net.node_labels,{0: 'A', 1: 'B', 2: 'C'})
-        # self.assertTrue(np.array_equal(
-        #     net.toarray(),
-        #     np.array(
-        #         [[0., 0., 1.],
-        #          [1., 0., 0.],
-        #          [1., 0., 0.]]
-        #     )
-        # ))
-        # self.assertTrue(net.node_labels=={0: 'B', 1: 'A', 2: 'C'})
