@@ -1,7 +1,6 @@
 from unittest import TestCase
 from pycomplexnet import Network
 import pandas as pd
-import numpy as np
 
 class TestConstructors(TestCase):
     def test_from_pandas(self):
