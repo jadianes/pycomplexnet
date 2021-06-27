@@ -3,7 +3,10 @@ import numpy as np
 from scipy.sparse import coo_matrix
 
 class Network:
-    """A directed graph representation of a Network"""
+    """A directed graph representation of a Network
+        The convention for the adjacency matrix is that, if adjacency_matrix[i,j]==1, then
+        there is a link from node i to node j.
+    """
  
     def __init__(self, adjacency_matrix, node_labels=None):
         self.adjacency_matrix = adjacency_matrix
@@ -46,16 +49,28 @@ class Network:
         return self.adjacency_matrix.toarray()
         
     def get_in_degree(self, node_i):
+        """The in degree is the sum of all elements of the i_th column of the adjacency matrix"""
         return self.adjacency_matrix.getcol(node_i).sum()
 
     def get_in_degrees(self):
+        """The list of in degrees is the sum of all elements of each row of the adjacency matrix"""
         return self.adjacency_matrix.sum(0)
 
     def get_out_degree(self, node_i):
+        """The in degree is the sum of all elements of the i_th row of the adjacency matrix"""
         return self.adjacency_matrix.getrow(node_i).sum()
 
     def get_out_degrees(self):
+        """The list of in degrees is the sum of all elements of each column of the adjacency matrix"""
         return self.adjacency_matrix.sum(1).flatten()
+
+    def get_out_neighbourhood(self, node_i):
+        """Get the list of nodes that node_i connects to, which are given by the i_th row of the adjacency matrix"""
+        return self.adjacency_matrix.toarray()[node_i,:]
+
+    def get_in_neighbourhood(self, node_i):
+        """Get the list of nodes that connect with node_i, which are given by the i_th column of the adjacency matrix"""
+        return self.adjacency_matrix.toarray()[:,node_i]
 
     def get_joint_degree_dist(self, k_in, k_out):
         return (
