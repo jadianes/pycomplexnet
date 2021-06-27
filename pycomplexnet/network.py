@@ -72,6 +72,15 @@ class Network:
         """Get the list of nodes that connect with node_i, which are given by the i_th column of the adjacency matrix"""
         return self.adjacency_matrix.toarray()[:,node_i]
 
+    def get_num_triangles(self, node_i):
+        """The number of triangles starting and ending in node_i can be found in the diagonal of A^3"""
+        A = self.toarray()
+        A_3 = (A@A@A)
+        if isinstance(node_i,list):
+            return [int(A_3[i,i]) for i in node_i]
+        else:
+            return int(A_3[node_i,node_i])
+
     def get_joint_degree_dist(self, k_in, k_out):
         return (
             (1.0/self.adjacency_matrix.get_shape()[0])
