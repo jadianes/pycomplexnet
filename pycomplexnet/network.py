@@ -170,7 +170,22 @@ class Network:
 
         return 0
 
-    def get_num_shortest_paths_by(self, node_i, node_j, node_l):
+    def get_num_shortest_paths_by(self, node_j, node_l, node_i):
         """We interested in the number of shortest paths between node_j and
         node_l passing through node_i"""
-        return 0
+        # d_j_l = length of shortest path from node_j to node_l
+        d_j_l = self.get_distance(node_j, node_l)
+        # d_j_i = length of shortest path from node_j to node_i
+        d_j_i = self.get_distance(node_j, node_i)
+        # check we can still get to l faster
+        if d_j_i < d_j_l:
+            # d_i_l = length of shortest path from node_i to node_l
+            d_i_l = self.get_distance(node_i, node_l)
+            # check i actually is part of the shortest paths (it can't be shorter)
+            if (d_j_i + d_i_l) == d_j_l:
+                # the result is the number of combinations
+                return self.get_num_shortest_paths(node_j, node_i) * self.get_num_shortest_paths(node_i, node_l)
+            else:
+                return 0
+        else:
+            return 0
