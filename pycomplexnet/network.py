@@ -11,7 +11,12 @@ class Network:
     def __init__(self, adjacency_matrix, node_labels=None):
         self.adjacency_matrix = adjacency_matrix
         if node_labels is not None:
-            self.node_labels = node_labels
+            self.node_labels = {
+                index:node for node, index in zip(node_labels, range(0,len(node_labels)))
+            }
+            self.node_labels_map = {
+                node:index for node, index in zip(node_labels, range(0,len(node_labels)))
+            }
 
     def from_pandas(links, from_column='from', to_column='to'):
         from_nodes = links[from_column]
@@ -39,17 +44,17 @@ class Network:
             a[node_labels_t[from_node], node_labels_t[to_node]] = 1.0
             
         # create network
-        return Network(
-            coo_matrix(a), 
-            {
-                index:node for node, index in zip(all_nodes, range(0,n_nodes))
-            })
+        return Network(coo_matrix(a), all_nodes)
 
     def toarray(self):
         return self.adjacency_matrix.toarray()
         
     def get_in_degree(self, node_i):
         """The in degree is the sum of all elements of the i_th column of the adjacency matrix"""
+        try:
+            node_i = self.node_labels_map[node_i]
+        except:
+            pass
         return self.adjacency_matrix.getcol(node_i).sum()
 
     def get_in_degrees(self):
@@ -58,6 +63,10 @@ class Network:
 
     def get_out_degree(self, node_i):
         """The in degree is the sum of all elements of the i_th row of the adjacency matrix"""
+        try:
+            node_i = self.node_labels_map[node_i]
+        except:
+            pass
         return self.adjacency_matrix.getrow(node_i).sum()
 
     def get_out_degrees(self):
@@ -66,10 +75,18 @@ class Network:
 
     def get_out_neighbourhood(self, node_i):
         """Get the list of nodes that node_i connects to, which are given by the i_th row of the adjacency matrix"""
+        try:
+            node_i = self.node_labels_map[node_i]
+        except:
+            pass
         return self.adjacency_matrix.toarray()[node_i,:]
 
     def get_in_neighbourhood(self, node_i):
         """Get the list of nodes that connect with node_i, which are given by the i_th column of the adjacency matrix"""
+        try:
+            node_i = self.node_labels_map[node_i]
+        except:
+            pass
         return self.adjacency_matrix.toarray()[:,node_i]
 
     def get_num_triangles(self, node_i):
@@ -77,6 +94,10 @@ class Network:
         A = self.toarray()
         A_3 = (A@A@A)
         if isinstance(node_i,list):
+            try:
+                node_i = [self.node_labels_map[i] for i in node_i] 
+            except:
+                pass
             return [int(A_3[i,i]) for i in node_i]
         else:
             return int(A_3[node_i,node_i])
@@ -115,6 +136,11 @@ class Network:
         )
 
     def get_distance(self, node_i, node_j):
+        try:
+            node_i = self.node_labels_map[node_i]
+            node_j = self.node_labels_map[node_j]
+        except:
+            pass
         steps = 1
         a = b = self.adjacency_matrix.toarray()
         while steps<a.shape[0]:
@@ -129,6 +155,11 @@ class Network:
         """The number of shortest paths between two nodes, if any, is
         given by multiplying the adjacency matrix by itself.
         """
+        try:
+            node_i = self.node_labels_map[node_i]
+            node_j = self.node_labels_map[node_j]
+        except:
+            pass
         steps = 1
         a = b = self.adjacency_matrix.toarray()
         while steps<a.shape[0]:
@@ -137,4 +168,9 @@ class Network:
             b = b@a
             steps+=1
 
+        return 0
+
+    def get_num_shortest_paths_by(self, node_i, node_j, node_l):
+        """We interested in the number of shortest paths between node_j and
+        node_l passing through node_i"""
         return 0
