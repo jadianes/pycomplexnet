@@ -118,9 +118,23 @@ class Network:
         steps = 1
         a = b = self.adjacency_matrix.toarray()
         while steps<a.shape[0]:
-            if b[node_j,node_i] > 0:
+            if b[node_i,node_j] > 0:
                 return steps
-            b = np.matmul(b,a)
+            b = b@a
             steps+=1
 
         return np.Inf
+    
+    def get_num_shortest_paths(self, node_i, node_j):
+        """The number of shortest paths between two nodes, if any, is
+        given by multiplying the adjacency matrix by itself.
+        """
+        steps = 1
+        a = b = self.adjacency_matrix.toarray()
+        while steps<a.shape[0]:
+            if b[node_i,node_j] > 0:
+                return int(b[node_i,node_j])
+            b = b@a
+            steps+=1
+
+        return 0
