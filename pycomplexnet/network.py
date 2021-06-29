@@ -138,29 +138,18 @@ class Network:
             )
         )
 
-    def get_distance_2(self, node_i, node_j):
-        try:
-            node_i = self.node_labels_map[node_i]
-        except:
-            pass
-        try:
-            node_j = self.node_labels_map[node_j]
-        except:
-            pass
-        if node_i==node_j:
-            return 0
-        steps = 1
-        a = b = self.adjacency_matrix.toarray()
-        while steps<a.shape[0]:
-            if b[node_i,node_j] > 0:
-                return steps
-            b = b@a
-            steps+=1
-
-        return np.Inf
-
     def get_distance(self, node_i, node_j):
         return self.get_shortest_paths(node_i, node_j)[0]
+
+    def get_average_distance(self, node_i):
+        N = self.adjacency_matrix.shape[0]
+        return sum([
+            self.get_distance(node_i, self.node_labels[j]) 
+            for j in range(0,N)
+        ]) / N
+
+    def get_closeness_centrality(self, node_i):
+        return 1.0/self.get_average_distance(node_i)
 
     def get_shortest_paths(self, node_i, node_j):
         """The number of shortest paths between two nodes, if any, is
