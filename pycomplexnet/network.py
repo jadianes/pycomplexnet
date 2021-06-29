@@ -103,7 +103,32 @@ class Network:
                 pass
             return [int(A_3[i,i]) for i in node_i]
         else:
+            try:
+                node_i = self.node_labels_map[node_i]
+            except:
+                pass
             return int(A_3[node_i,node_i])
+
+    def get_reciprocal_degree(self, node_i):
+        A = self.toarray()
+        if isinstance(node_i,list):
+            try:
+                node_i = [self.node_labels_map[i] for i in node_i] 
+            except:
+                pass
+            return [sum(A[i,:]*A[:,i]) for i in node_i]
+        else:
+            try:
+                node_i = self.node_labels_map[node_i]
+            except:
+                pass
+            return sum(A[node_i,:]*A[:,node_i])
+
+    def get_clustering_coeff(self, node_i):
+        t = self.get_num_triangles(node_i)
+        deg_tot = self.get_in_degree(node_i) + self.get_out_degree(node_i)
+        deg_recip = self.get_reciprocal_degree(node_i)
+        return float(t) / (deg_tot*(deg_tot-1.0) - 2.0 * deg_recip)
 
     def get_joint_degree_dist(self, k_in, k_out):
         return (
