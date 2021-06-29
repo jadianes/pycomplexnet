@@ -1,6 +1,7 @@
 
 import numpy as np
 from scipy.sparse import coo_matrix
+import itertools
 
 class Network:
     """A directed graph representation of a Network
@@ -10,13 +11,15 @@ class Network:
  
     def __init__(self, adjacency_matrix, node_labels=None):
         self.adjacency_matrix = adjacency_matrix
-        if node_labels is not None:
-            self.node_labels = {
-                index:node for node, index in zip(node_labels, range(0,len(node_labels)))
-            }
-            self.node_labels_map = {
-                node:index for node, index in zip(node_labels, range(0,len(node_labels)))
-            }
+        if node_labels is None:
+            node_labels=[node_i for node_i in range(0,adjacency_matrix.shape[0])]
+        self.node_labels = {
+            index:node for node, index in zip(node_labels, range(0,len(node_labels)))
+        }
+        self.node_labels_map = {
+            node:index for node, index in zip(node_labels, range(0,len(node_labels)))
+        }
+
 
     def from_pandas(links, from_column='from', to_column='to'):
         from_nodes = links[from_column]
@@ -135,12 +138,17 @@ class Network:
             )
         )
 
-    def get_distance(self, node_i, node_j):
+    def get_distance_2(self, node_i, node_j):
         try:
             node_i = self.node_labels_map[node_i]
+        except:
+            pass
+        try:
             node_j = self.node_labels_map[node_j]
         except:
             pass
+        if node_i==node_j:
+            return 0
         steps = 1
         a = b = self.adjacency_matrix.toarray()
         while steps<a.shape[0]:
@@ -150,42 +158,78 @@ class Network:
             steps+=1
 
         return np.Inf
-    
-    def get_num_shortest_paths(self, node_i, node_j):
+
+    def get_distance(self, node_i, node_j):
+        return self.get_shortest_paths(node_i, node_j)[0]
+
+    def get_shortest_paths(self, node_i, node_j):
         """The number of shortest paths between two nodes, if any, is
         given by multiplying the adjacency matrix by itself.
+        Returns: (length, number of paths)
         """
         try:
             node_i = self.node_labels_map[node_i]
+        except:
+            pass
+        try:
             node_j = self.node_labels_map[node_j]
         except:
             pass
+        # paths to self
+        if node_i==node_j:
+            return (0,1)
+        # path to different nodes
         steps = 1
         a = b = self.adjacency_matrix.toarray()
         while steps<a.shape[0]:
             if b[node_i,node_j] > 0:
-                return int(b[node_i,node_j])
+                return (steps, int(b[node_i,node_j]))
             b = b@a
             steps+=1
 
-        return 0
+        return (np.Inf, 0)
 
-    def get_num_shortest_paths_by(self, node_j, node_l, node_i):
+    def get_shortest_paths_by(self, node_j, node_l, node_i):
         """We interested in the number of shortest paths between node_j and
         node_l passing through node_i"""
-        # d_j_l = length of shortest path from node_j to node_l
-        d_j_l = self.get_distance(node_j, node_l)
-        # d_j_i = length of shortest path from node_j to node_i
-        d_j_i = self.get_distance(node_j, node_i)
-        # check we can still get to l faster
-        if d_j_i < d_j_l:
-            # d_i_l = length of shortest path from node_i to node_l
-            d_i_l = self.get_distance(node_i, node_l)
-            # check i actually is part of the shortest paths (it can't be shorter)
-            if (d_j_i + d_i_l) == d_j_l:
-                # the result is the number of combinations
-                return self.get_num_shortest_paths(node_j, node_i) * self.get_num_shortest_paths(node_i, node_l)
-            else:
-                return 0
+        if (node_j==node_l) and (node_i!=node_j):
+            return (np.Inf, 0)
+        elif (node_i==node_j) or (node_i==node_l):
+            return self.get_shortest_paths(node_j, node_l)
         else:
-            return 0
+            # d_j_l = length of shortest path from node_j to node_l
+            d_j_l = self.get_shortest_paths(node_j, node_l)[0]
+            # d_j_i = length of shortest path from node_j to node_i
+            d_j_i = self.get_shortest_paths(node_j, node_i)[0]
+            # check we can still get to l faster
+            if d_j_i < d_j_l:
+                # d_i_l = length of shortest path from node_i to node_l
+                d_i_l = self.get_shortest_paths(node_i, node_l)[0]
+                # check i actually is part of the shortest paths (it can't be shorter)
+                if (d_j_i + d_i_l) == d_j_l:
+                    # the result is the number of combinations
+                    return (d_j_l, self.get_shortest_paths(node_j, node_i)[1] * self.get_shortest_paths(node_i, node_l)[1])
+                else:
+                    return (np.Inf, 0)
+            else:
+                return (np.Inf, 0)
+
+    def get_betweeness_centrality(self, node_i):
+        """y_i(A) = 
+            sum_j  
+                sum_l 
+                    num_shortest_paths_by(j,l,i) / num_shortest_paths(j,l) 
+        """
+        N = self.adjacency_matrix.shape[0]
+        num_shortest_paths = [
+            self.get_shortest_paths(self.node_labels[j],self.node_labels[l])[1] 
+            for j,l in itertools.product(range(0,N),range(0,N))
+        ]
+        num_shortest_paths_by = [
+            self.get_shortest_paths_by(self.node_labels[j],self.node_labels[l], node_i)[1] 
+            for j,l in itertools.product(range(0,N),range(0,N))
+        ]
+        return sum([
+            n / g if (g!=0) else 0
+            for n,g in zip(num_shortest_paths_by,num_shortest_paths)
+        ])
